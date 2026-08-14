@@ -1,6 +1,9 @@
 import streamlit as st
 import pandas as pd
 import json
+import os
+
+APP_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 st.set_page_config(page_title="Model Performance", layout="wide")
 st.title("Model Performance and MLflow Experiment Tracking")
@@ -12,7 +15,7 @@ Below is a summary of the algorithms we compared and their evaluation scores.
 
 @st.cache_data
 def load_results():
-    with open("data/model_results.json") as f:
+    with open(os.path.join(APP_DIR, "data", "model_results.json")) as f:
         return json.load(f)
 
 results = load_results()
@@ -44,13 +47,3 @@ pca_df.columns = ["Configuration", "Number of Components", "Variance Explained"]
 pca_df["Variance Explained"] = (pca_df["Variance Explained"] * 100).round(1).astype(str) + "%"
 st.dataframe(pca_df, use_container_width=True)
 
-st.markdown("""
----
-### How to view the full MLflow dashboard
-Since Streamlit Cloud cannot run a separate MLflow server, the full interactive
-MLflow UI (with all logged parameters and metrics) can be viewed locally by running:
-```
-mlflow ui --backend-store-uri sqlite:///mlflow.db
-```
-from the project folder, then opening the link it prints (usually `http://localhost:5000`).
-""")

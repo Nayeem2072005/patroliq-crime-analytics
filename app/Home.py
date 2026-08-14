@@ -1,5 +1,11 @@
 import streamlit as st
 import pandas as pd
+import os
+
+# Get the absolute path to this script's folder, so file loading works
+# regardless of what directory the app is launched from (fixes Streamlit
+# Cloud's working directory being different from local testing)
+APP_DIR = os.path.dirname(os.path.abspath(__file__))
 
 st.set_page_config(page_title="PatrolIQ - Smart Safety Analytics", layout="wide")
 
@@ -20,7 +26,7 @@ and time-based crime patterns using unsupervised machine learning techniques.
 # Load data just to show a quick dataset summary on the home page
 @st.cache_data
 def load_data():
-    return pd.read_csv("data/crime_data_app.csv")
+    return pd.read_csv(os.path.join(APP_DIR, "data", "crime_data_app.csv"))
 
 df = load_data()
 

@@ -2,6 +2,9 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import json
+import os
+
+APP_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 st.set_page_config(page_title="Dimensionality Reduction", layout="wide")
 st.title("Dimensionality Reduction: PCA and t-SNE")
@@ -15,9 +18,9 @@ similar crimes together.
 
 @st.cache_data
 def load_data():
-    df = pd.read_csv("data/crime_data_app.csv")
-    tsne_df = pd.read_csv("data/tsne_app.csv")
-    with open("data/model_results.json") as f:
+    df = pd.read_csv(os.path.join(APP_DIR, "data", "crime_data_app.csv"))
+    tsne_df = pd.read_csv(os.path.join(APP_DIR, "data", "tsne_app.csv"))
+    with open(os.path.join(APP_DIR, "data", "model_results.json")) as f:
         results = json.load(f)
     return df, tsne_df, results
 

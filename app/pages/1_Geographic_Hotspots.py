@@ -2,6 +2,9 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import os
+
+APP_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 st.set_page_config(page_title="Geographic Hotspots", layout="wide")
 st.title("Geographic Crime Hotspot Clustering")
@@ -16,7 +19,7 @@ and produces clean, easy-to-interpret zones for patrol planning.
 
 @st.cache_data
 def load_data():
-    return pd.read_csv("data/crime_data_app.csv")
+    return pd.read_csv(os.path.join(APP_DIR, "data", "crime_data_app.csv"))
 
 df = load_data()
 
