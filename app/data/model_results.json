@@ -1,0 +1,36 @@
+{
+  "geographic_clustering": {
+    "KMeans": {
+      "silhouette": 0.4,
+      "davies_bouldin": 0.852,
+      "n_clusters": 7
+    },
+    "DBSCAN": {
+      "silhouette": 0.093,
+      "davies_bouldin": 0.429,
+      "n_clusters": 6
+    },
+    "Hierarchical": {
+      "silhouette": 0.374,
+      "davies_bouldin": 0.889,
+      "n_clusters": 7
+    }
+  },
+  "temporal_clustering": {
+    "KMeans": {
+      "silhouette": 0.274,
+      "n_clusters": 4
+    }
+  },
+  "dimensionality_reduction": {
+    "PCA": {
+      "n_components": 6,
+      "total_variance_explained": 0.714
+    },
+    "PCA_top3_only": {
+      "n_components": 3,
+      "total_variance_explained": 0.487
+    }
+  },
+  "best_algorithm": "KMeans (highest silhouette score for geographic clustering)"
+}
