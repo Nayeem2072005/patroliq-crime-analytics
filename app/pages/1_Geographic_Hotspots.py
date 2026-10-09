@@ -60,3 +60,74 @@ ax2.set_xlabel("Police District")
 ax2.set_ylabel("Number of Crimes")
 ax2.set_title("Crime Count per District (Red = High Risk, Yellow = Medium, Green = Low)")
 st.pyplot(fig2)
+
+from pathlib import Path
+
+import pandas as pd
+
+ASSETS = Path(__file__).resolve().parent.parent / "assets"
+NEEDED = ["elbow_plot.png", "silhouette_by_k.png", "dendrogram.png", "kmeans_k_sweep.csv", "dbscan_grid.csv"]
+
+st.divider()
+st.header("How the clustering settings were checked")
+
+if not all((ASSETS / f).exists() for f in NEEDED):
+    st.warning("The extra evaluation files were not found in the app's assets folder.")
+else:
+    # --- K-Means: elbow and silhouette by k ---
+    st.subheader("K-Means: choosing k")
+    sweep = pd.read_csv(ASSETS / "kmeans_k_sweep.csv")
+    best = sweep.loc[sweep["silhouette"].idxmax()]
+    deployed = sweep[sweep["k"] == 7].iloc[0]
+    left, right = st.columns(2)
+    left.image(str(ASSETS / "elbow_plot.png"), caption="Elbow plot (inertia by k)")
+    right.image(str(ASSETS / "silhouette_by_k.png"), caption="Silhouette score by k")
+    summary = (
+        f"Silhouette is highest at k = {int(best['k'])} ({best['silhouette']:.3f}); "
+        f"the deployed k = 7 scores {deployed['silhouette']:.3f} "
+        f"(Davies-Bouldin {deployed['davies_bouldin']:.3f}). "
+    )
+    if (sweep["silhouette"] < 0.5).all():
+        summary += "No value of k reaches the brief's 0.5 target."
+    else:
+        summary += "At least one value of k reaches the brief's 0.5 target."
+    st.write(summary)
+    with st.expander("Full table (k = 2 to 10)"):
+        st.dataframe(sweep.round(3))
+
+    # --- Hierarchical: dendrogram ---
+    st.subheader("Hierarchical clustering: dendrogram")
+    st.image(
+        str(ASSETS / "dendrogram.png"),
+        caption="Ward linkage on a 1,500-point sample (last 30 merges shown)",
+    )
+
+    # --- DBSCAN: parameter grid ---
+    st.subheader("DBSCAN: parameter grid")
+    grid = pd.read_csv(ASSETS / "dbscan_grid.csv")
+    one_cluster = int((grid["largest_cluster_%_of_clustered"] > 95).sum())
+    top = (
+        grid.dropna(subset=["silhouette_excl_noise"])
+        .sort_values("silhouette_excl_noise", ascending=False)
+        .iloc[0]
+    )
+    st.write(
+        f"{len(grid)} settings were tried. In {one_cluster} of them more than 95% of the clustered crimes "
+        f"fall into a single cluster. The best silhouette ({top['silhouette_excl_noise']:.3f}, "
+        f"eps = {top['eps']}, min_samples = {int(top['min_samples'])}) labels {top['noise_%']}% of crimes "
+        f"as noise, so it describes only a small part of the city."
+    )
+    good = grid[grid["silhouette_excl_noise"] > 0.5]
+    if len(good):
+        degenerate = good[(good["noise_%"] > 90) | (good["largest_cluster_%_of_clustered"] > 95)]
+        if len(degenerate) == len(good):
+            st.write(
+                f"All {len(good)} settings that score above 0.5 are degenerate: they either label more than 90% "
+                f"of crimes as noise or put more than 95% of the clustered crimes into one cluster, so none of "
+                f"them gives a usable zoning of the city."
+            )
+        else:
+            st.write(
+                f"{len(good)} settings score above 0.5; check the table to see which of them give usable zones."
+            )
+    st.dataframe(grid.round(3))

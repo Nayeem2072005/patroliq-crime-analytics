@@ -71,3 +71,10 @@ cluster_profile["avg_hour"] = cluster_profile["avg_hour"].round(1)
 cluster_profile["weekend_pct"] = (cluster_profile["weekend_pct"] * 100).round(1)
 cluster_profile.columns = ["Temporal Cluster", "Average Hour", "Total Crimes", "% Weekend Crimes"]
 st.dataframe(cluster_profile, use_container_width=True)
+
+st.info(
+    "Note on hour 0: about 3.3% of the raw records are stamped exactly 00:00:00 (and 2.0% exactly "
+    "12:00:00), which most likely means the time was not recorded. Hour 0 shows 6,385 crimes against "
+    "3,288 at hour 1; removing the exact-midnight records leaves roughly 3,100, close to its "
+    "neighbours. Read the hour-0 bar as a data artifact, not as a danger peak."
+)
